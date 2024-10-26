@@ -34,8 +34,7 @@ inventoryRouter.post(
         },
         select: {
           id: true,
-          productId: true,
-          sku: true,
+          quantity: true,
         },
       });
 
@@ -89,11 +88,16 @@ inventoryRouter.put(
           histories: {
             create: {
               actionType: req.body.actionType,
-              quantityChanged: newQuantity,
+              quantityChanged: req.body.quantity,
               lastQuantity: lastHistory?.newQuantity || 0,
               newQuantity,
             },
           },
+        },
+
+        select: {
+          id: true,
+          quantity: true,
         },
       });
 
@@ -105,3 +109,50 @@ inventoryRouter.put(
     }
   }
 );
+
+inventoryRouter.get("/:id", async (req, res, next) => {
+  try {
+    const inventory = await prisma.inventory.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true,
+        quantity: true,
+      },
+    });
+
+    if (!inventory) {
+      throw new ApiError("Not Found", 404);
+    }
+
+    res.send({ message: "success", data: inventory });
+  } catch (error) {
+    console.log(error);
+
+    next(error);
+  }
+});
+
+inventoryRouter.get("/:id/details", async (req, res, next) => {
+  try {
+    const inventory = await prisma.inventory.findUnique({
+      where: { id: req.params.id },
+      include: {
+        histories: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
+
+    if (!inventory) {
+      throw new ApiError("Not Found", 404);
+    }
+
+    res.send({ message: "success", data: inventory });
+  } catch (error) {
+    console.log(error);
+
+    next(error);
+  }
+});
