@@ -4,7 +4,7 @@ export const inventoryCreateDTOSchema = z.object({
   body: z.object({
     sku: z.string(),
     productId: z.string(),
-    quantity: z.number().positive().optional().default(0),
+    quantity: z.number().default(0),
   }),
 });
 

@@ -14,6 +14,7 @@ const validateResource =
       req.body = reqSchema.body;
       req.params = reqSchema.params;
       req.query = reqSchema.query;
+
       next();
     } catch (error) {
       if (error instanceof ZodError) {

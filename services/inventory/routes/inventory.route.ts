@@ -20,6 +20,16 @@ inventoryRouter.post(
     next: NextFunction
   ) => {
     try {
+      const existingInventory = await prisma.inventory.findFirst({
+        where: {
+          OR: [{ sku: req.body.sku }, { productId: req.body.productId }],
+        },
+      });
+
+      if (existingInventory) {
+        throw new ApiError("sku or productId conflict", 400);
+      }
+
       const inventory = await prisma.inventory.create({
         data: {
           ...req.body,

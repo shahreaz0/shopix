@@ -1,7 +1,7 @@
 import express, { ErrorRequestHandler } from "express";
 import cors from "cors";
-import { inventoryRouter } from "./routes/inventory.route";
-import { ApiError } from "./lib/api-error";
+import { productRouter } from "@/routes/product.route";
+import { ApiError } from "@/lib/api-error";
 
 const app = express();
 
@@ -10,10 +10,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 app.get("/hc", (_, res) => {
-  res.send({ status: "ok", service: "inventory", timestamp: Date.now() });
+  res.send({ status: "ok", service: "product", timestamp: Date.now() });
 });
 
-app.use("/inventories", inventoryRouter);
+app.use("/products", productRouter);
 
 app.use((_req, _res, next) => {
   next(new ApiError("Not Found", 404));
