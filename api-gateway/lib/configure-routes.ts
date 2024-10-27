@@ -17,8 +17,6 @@ export function createHandler({
 
       req.params &&
         Object.keys(req.params).forEach((key) => {
-          console.log(key, req.params[key]);
-
           url = url.replace(`:${key}`, req.params[key]);
         });
 

@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/api-error";
+import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import validateResource from "@/lib/validate-resource";
 import { ProductCreateDTO, productCreateDTOSchema } from "@/schemas/product.schema";
@@ -29,10 +30,13 @@ productRouter.post(
         data: req.body,
       });
 
-      const { data: inventory } = await xior.post("http://localhost:4002/inventories", {
-        sku: product.sku,
-        productId: product.id,
-      });
+      const { data: inventory } = await xior.post(
+        `${env.get("INVENTORY_BASE_URL")}/inventories`,
+        {
+          sku: product.sku,
+          productId: product.id,
+        }
+      );
 
       const updatedProduct = await prisma.product.update({
         where: {
@@ -67,10 +71,13 @@ productRouter.get("/:id", async (req, res, next) => {
     const product = await prisma.product.findUnique({ where: { id: req.params.id } });
 
     if (product?.inventoryId === null) {
-      const { data: inventory } = await xior.post(`http://localhost:4002/inventories`, {
-        sku: product.sku,
-        productId: product.id,
-      });
+      const { data: inventory } = await xior.post(
+        `${env.get("INVENTORY_BASE_URL")}/inventories`,
+        {
+          sku: product.sku,
+          productId: product.id,
+        }
+      );
 
       const updatedProduct = await prisma.product.update({
         where: {
