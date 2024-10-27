@@ -36,7 +36,7 @@ export function createHandler({
 }
 
 export function configureRoutes(app: Express) {
-  Object.entries(config.services).forEach(([name, service]) => {
+  Object.entries(config.services).forEach(([_name, service]) => {
     const hostname = service.url;
 
     service.routes.forEach((route) => {

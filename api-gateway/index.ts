@@ -14,8 +14,6 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
 });
 
-// Apply the rate limiting middleware to all requests.
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
@@ -24,7 +22,7 @@ app.use("/api", limiter);
 
 configureRoutes(app);
 
-app.get("/hc", (_, res) => {
+app.get("/health", (_, res) => {
   res.send({ status: "ok", service: "api-gateway", timestamp: Date.now() });
 });
 
