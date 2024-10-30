@@ -21,6 +21,16 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog_c
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    volumes:
+      - mailhog:/var/lib/mailhog
+
 volumes:
   local_pgdata:
   pgadmin-data:
+  mailhog:
