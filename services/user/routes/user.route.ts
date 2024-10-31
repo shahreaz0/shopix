@@ -43,7 +43,7 @@ userRouter.get("/:id", async (req, res, next) => {
     });
 
     if (!existingUser) {
-      throw new ApiError("auth user id conflict", 400);
+      throw new ApiError("No user found", 400);
     }
 
     res.send({ message: "success", data: existingUser });

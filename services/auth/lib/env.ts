@@ -5,6 +5,7 @@ const _env = {
   SERVICE_NAME: process.env.SERVICE_NAME,
   DATABASE_URL: process.env.DATABASE_URL,
   USER_BASE_URL: process.env.USER_BASE_URL,
+  EMAIL_BASE_URL: process.env.EMAIL_BASE_URL,
 };
 
 export const env = {

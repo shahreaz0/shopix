@@ -17,5 +17,13 @@ export const userLoginDTOSchema = z.object({
   }),
 });
 
+export const emailVerificationSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    code: z.string().min(1),
+  }),
+});
+
 export type UserRegisterDTO = z.infer<typeof userRegisterDTOSchema>;
 export type UserLoginDTO = z.infer<typeof userLoginDTOSchema>;
+export type EmailVerification = z.infer<typeof emailVerificationSchema>;

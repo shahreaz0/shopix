@@ -17,9 +17,12 @@ emailRouter.post(
     next: NextFunction
   ) => {
     try {
+      const sender =
+        req.body.sender || env.get("DEFAULT_SENDER_EMAIL") || "ashahreaz@gmail.com";
+
       const { rejected } = await transporter.sendMail({
         to: req.body.recipient,
-        from: req.body.sender || env.get("DEFAULT_SENDER_EMAIL"),
+        from: sender,
         subject: req.body.subject,
         text: req.body.body,
       });
@@ -28,7 +31,12 @@ emailRouter.post(
         throw new ApiError("Failed to send email", 400);
       }
 
-      const email = await prisma.email.create({ data: req.body });
+      const email = await prisma.email.create({
+        data: {
+          ...req.body,
+          sender,
+        },
+      });
 
       res.send({ message: "Email send successfully", data: email });
     } catch (error) {
