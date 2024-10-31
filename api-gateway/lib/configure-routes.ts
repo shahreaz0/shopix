@@ -1,6 +1,14 @@
-import { Express, NextFunction, Request, Response } from "express";
+import { Express, Request, Response } from "express";
 import config from "@/config.json";
 import xior, { XiorError } from "xior";
+
+import * as middlewares from "@/middlewares";
+
+type Methods = "get" | "post" | "put" | "delete";
+
+export function getMiddlewares(names: string[]) {
+  return names.map((name) => middlewares[name as keyof typeof middlewares]);
+}
 
 export function createHandler({
   hostname,
@@ -11,7 +19,7 @@ export function createHandler({
   path: string;
   method: string;
 }) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response) => {
     try {
       let url = `${hostname}${path}`;
 
@@ -24,6 +32,10 @@ export function createHandler({
         method,
         url,
         data: req.body,
+        headers: {
+          ...req.headers,
+          "x-user-id": req.headers["x-user-id"],
+        },
       });
 
       res.json(data);
@@ -40,10 +52,15 @@ export function configureRoutes(app: Express) {
     const hostname = service.url;
 
     service.routes.forEach((route) => {
+      const middlewareNames =
+        "middlewares" in route ? (route?.middlewares as string[]) : [];
+
       route.methods.forEach((method) => {
         const handler = createHandler({ hostname, path: route.path, method });
 
-        app[method as "get" | "post" | "put" | "delete"](`/api${route.path}`, handler);
+        const middleware = getMiddlewares(middlewareNames);
+
+        app[method as Methods](`/api${route.path}`, middleware, handler);
       });
     });
   });

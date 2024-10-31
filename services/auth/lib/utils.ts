@@ -3,7 +3,7 @@ import * as jose from "jose";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { prisma } from "./prisma";
-import { AttemptStatus } from "@prisma/client";
+import { AccountStatus, AttemptStatus, Role } from "@prisma/client";
 
 export async function hashPassword(password: string) {
   try {
@@ -22,11 +22,19 @@ export async function verifyPassword(hash: string, password: string) {
     return isVerified;
   } catch (_err) {
     return false;
-    // internal failure
   }
 }
 
-export async function signJWT(payload = {}, expiresIn = "30m") {
+type Payload = {
+  status: AccountStatus;
+  email: string;
+  id: string;
+  name: string;
+  role: Role;
+  verified: boolean;
+};
+
+export async function signJWT(payload: Payload, expiresIn = "30m") {
   try {
     const pkcs8 = await fs.readFile(path.join("certs/private.pem"), "utf8");
     const alg = "RS256";
@@ -37,6 +45,7 @@ export async function signJWT(payload = {}, expiresIn = "30m") {
       .setProtectedHeader({ alg })
       .setIssuedAt()
       .setExpirationTime(expiresIn)
+      .setIssuer("http://localhost:4003")
       .sign(privateKey);
 
     console.log(jwt);
