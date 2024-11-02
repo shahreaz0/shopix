@@ -30,7 +30,19 @@ services:
     volumes:
       - mailhog:/var/lib/mailhog
 
+  redis-stack:
+    image: redis/redis-stack:latest
+    container_name: redis-stack_c
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    environment:
+      - REDIS_ARGS=--requirepass mypassword
+    volumes:
+      - redis-stack:/var/lib/redis-stack/data
+
 volumes:
   local_pgdata:
   pgadmin-data:
   mailhog:
+  redis-stack:
