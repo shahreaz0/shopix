@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
-app.get("/hc", (_, res) => {
+app.get("/health", (_, res) => {
   res.send({ status: "ok", service: "product", timestamp: Date.now() });
 });
 

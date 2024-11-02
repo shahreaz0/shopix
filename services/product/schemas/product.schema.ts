@@ -12,4 +12,12 @@ export const productCreateDTOSchema = z.object({
   }),
 });
 
+export const productUpdateDTOSchema = z.object({
+  body: productCreateDTOSchema.shape.body.omit({ sku: true }).partial(),
+  params: z.object({
+    id: z.string(),
+  }),
+});
+
 export type ProductCreateDTO = z.infer<typeof productCreateDTOSchema>;
+export type ProductUpdateDTO = z.infer<typeof productUpdateDTOSchema>;

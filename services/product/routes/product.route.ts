@@ -2,12 +2,29 @@ import { ApiError } from "@/lib/api-error";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import validateResource from "@/lib/validate-resource";
-import { ProductCreateDTO, productCreateDTOSchema } from "@/schemas/product.schema";
+import {
+  ProductCreateDTO,
+  productCreateDTOSchema,
+  ProductUpdateDTO,
+  productUpdateDTOSchema,
+} from "@/schemas/product.schema";
 import express, { NextFunction, Request, Response } from "express";
 import xior from "xior";
-import { z } from "zod";
 
 export const productRouter = express.Router();
+
+/**
+ * route list
+ * ==============
+ * POST products/
+ * GET products/
+ * GET products/:id
+ */
+
+/**
+ * @route POST products/
+ * @description create product
+ */
 
 productRouter.post(
   "/",
@@ -23,7 +40,7 @@ productRouter.post(
       });
 
       if (existingProduct) {
-        throw new ApiError("sku conflict", 400);
+        throw new ApiError("Product already Exists", 400);
       }
 
       const product = await prisma.product.create({
@@ -47,13 +64,57 @@ productRouter.post(
         },
       });
 
-      res.send({ message: "success", data: updatedProduct });
+      res.status(201).send({ message: "success", data: updatedProduct });
     } catch (error) {
       console.log(error);
       next(error);
     }
   }
 );
+
+/**
+ * @route PUT products/
+ * @description update product
+ */
+
+productRouter.put(
+  "/:id",
+  validateResource(productUpdateDTOSchema),
+  async (
+    req: Request<ProductUpdateDTO["params"], object, ProductUpdateDTO["body"]>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const productId = req.params.id;
+
+      const existingProduct = await prisma.product.findUnique({
+        where: { id: productId },
+      });
+
+      if (!existingProduct) {
+        throw new ApiError("No product found", 404);
+      }
+
+      const product = await prisma.product.update({
+        where: {
+          id: productId,
+        },
+        data: req.body,
+      });
+
+      res.send({ message: "success", data: product });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+/**
+ * @route GET products/
+ * @description get products list
+ */
 
 productRouter.get("/", async (_req, res, next) => {
   try {
@@ -65,6 +126,11 @@ productRouter.get("/", async (_req, res, next) => {
     next(error);
   }
 });
+
+/**
+ * @route GET products/:id
+ * @description get product details
+ */
 
 productRouter.get("/:id", async (req, res, next) => {
   try {
