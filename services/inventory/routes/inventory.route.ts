@@ -4,12 +4,31 @@ import validateResource from "@/lib/validate-resource";
 import {
   InventoryCreateDTO,
   inventoryCreateDTOSchema,
+  InventoryUpdateBulkDTO,
+  inventoryUpdateBulkDTOSchema,
   InventoryUpdateDTO,
   inventoryUpdateDTOSchema,
 } from "@/schemas/inventory.schema";
+import { ActionType } from "@prisma/client";
 import express, { NextFunction, Request, Response } from "express";
 
 export const inventoryRouter = express.Router();
+
+/**
+ * route's list
+ * ===================
+ * POST /inventories/
+ * PUT /inventories/bulk
+ * PUT /inventories/:id
+ * GET /inventories/
+ * GET /inventories/:id
+ * GET /inventories/:id/details
+ */
+
+/**
+ * @route POST /inventories/
+ * @description create inventory with history
+ */
 
 inventoryRouter.post(
   "/",
@@ -57,6 +76,102 @@ inventoryRouter.post(
   }
 );
 
+/**
+ * @route PUT /inventories/bulk
+ * @description update many inventory with history
+ */
+
+inventoryRouter.put(
+  "/bulk",
+  validateResource(inventoryUpdateBulkDTOSchema),
+  async (
+    req: Request<object, object, InventoryUpdateBulkDTO["body"]>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const inventoryIds = req.body.payload.map((e) => e.id);
+
+      const existingInventories = await prisma.inventory.findMany({
+        where: { id: { in: inventoryIds } },
+      });
+
+      if (existingInventories.length !== inventoryIds.length) {
+        const foundIds = existingInventories.map((inventory) => inventory.id);
+
+        const missingIds = [
+          ...new Set(inventoryIds.filter((id) => !foundIds.includes(id))),
+        ];
+
+        throw new ApiError("Some ids not found", 404, { foundIds, missingIds });
+      }
+
+      const updatedInventories = await Promise.allSettled(
+        req.body.payload.map(
+          async (item: { id: string; actionType: ActionType; quantity: number }) => {
+            const inventory = await prisma.inventory.findUnique({
+              where: { id: item.id },
+            });
+
+            const lastHistory = await prisma.history.findFirst({
+              where: {
+                inventoryId: item.id,
+              },
+              orderBy: {
+                createdAt: "desc",
+              },
+            });
+
+            let newQuantity = inventory!.quantity;
+            if (item.actionType === "IN") {
+              newQuantity += item.quantity;
+            } else {
+              newQuantity -= item.quantity;
+            }
+
+            if (newQuantity < 0) {
+              throw new ApiError(
+                `Inventory item ${item.id} cannot have a negative quantity`,
+                400
+              );
+            }
+
+            return prisma.inventory.update({
+              where: { id: item.id },
+              data: {
+                quantity: newQuantity,
+                histories: {
+                  create: {
+                    actionType: item.actionType,
+                    quantityChanged: item.quantity,
+                    lastQuantity: lastHistory?.newQuantity || 0,
+                    newQuantity,
+                  },
+                },
+              },
+              select: {
+                id: true,
+                quantity: true,
+              },
+            });
+          }
+        )
+      );
+
+      res.send({ message: "success", data: updatedInventories });
+    } catch (error) {
+      console.log(error);
+
+      next(error);
+    }
+  }
+);
+
+/**
+ * @route PUT /inventories/:id
+ * @description update one inventory with history
+ */
+
 inventoryRouter.put(
   "/:id",
   validateResource(inventoryUpdateDTOSchema),
@@ -91,6 +206,13 @@ inventoryRouter.put(
         newQuantity -= req.body.quantity;
       }
 
+      if (newQuantity < 0) {
+        throw new ApiError(
+          `Inventory item ${inventory.id} cannot have a negative quantity`,
+          400
+        );
+      }
+
       const updatedInventory = await prisma.inventory.update({
         where: { id: req.params.id },
         data: {
@@ -120,6 +242,35 @@ inventoryRouter.put(
   }
 );
 
+/**
+ * @route GET /inventories/
+ * @description get inventory list
+ */
+
+inventoryRouter.get("/", async (req, res, next) => {
+  try {
+    const inventories = await prisma.inventory.findMany({
+      select: {
+        id: true,
+        quantity: true,
+        sku: true,
+        productId: true,
+      },
+    });
+
+    res.send({ message: "success", data: inventories });
+  } catch (error) {
+    console.log(error);
+
+    next(error);
+  }
+});
+
+/**
+ * @route GET /inventories/:id
+ * @description get inventory by id
+ */
+
 inventoryRouter.get("/:id", async (req, res, next) => {
   try {
     const inventory = await prisma.inventory.findUnique({
@@ -141,6 +292,11 @@ inventoryRouter.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
+
+/**
+ * @route GET /inventories/:id
+ * @description get inventory details
+ */
 
 inventoryRouter.get("/:id/details", async (req, res, next) => {
   try {
