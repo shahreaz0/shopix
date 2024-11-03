@@ -5,6 +5,9 @@ import { addToCartSchema, AddToCart } from "@/schemas/cart.schema";
 import express, { NextFunction, Request, Response } from "express";
 import { env } from "@/lib/env";
 
+import xior from "xior";
+import { parseCartItems } from "@/lib/utls";
+
 export const cartRouter = express.Router();
 
 /**
@@ -50,21 +53,34 @@ cartRouter.post(
         cartSessionId = sessionUuid;
       }
 
+      const { data: inventoryInfo } = await xior.get<{
+        data: { id: string; quantity: number };
+      }>(`${env.get("INVENTORY_BASE_URL")}/inventories/${req.body.inventoryId}`);
+
+      const currentQuantity = inventoryInfo.data.quantity;
+
+      if (currentQuantity < req.body.quantity) {
+        throw new ApiError("Not enough product", 400);
+      }
+
       await redis.hset(
         `cart:${cartSessionId}`,
         req.body.productId,
-        JSON.stringify({ inventoryId: req.body.inventoryId, quantity: req.body.quantity })
+        JSON.stringify({
+          inventoryId: req.body.inventoryId,
+          quantity: req.body.quantity,
+        })
+      );
+
+      await xior.put(
+        `${env.get("INVENTORY_BASE_URL")}/inventories/${req.body.inventoryId}`,
+        {
+          quantity: req.body.quantity,
+          actionType: "OUT",
+        }
       );
 
       res.json({ message: "Product added", sessionId: cartSessionId });
-
-      // if no session header
-      // create new session
-      // add product to the cart
-
-      // if session
-      // check session is valid or not
-      //
     } catch (error) {
       next(error);
     }
@@ -80,8 +96,6 @@ cartRouter.get("/", async (req, res, next) => {
   try {
     const cartSessionId = req.headers["x-cart-session-id"];
 
-    console.log(cartSessionId);
-
     const exists = await redis.exists(`sessions:${cartSessionId}`);
     if (!exists) {
       await redis.del(`cart:${cartSessionId}`);
@@ -89,7 +103,7 @@ cartRouter.get("/", async (req, res, next) => {
 
     const data = await redis.hgetall(`cart:${cartSessionId}`);
 
-    res.json({ message: "success", data });
+    res.json({ message: "success", data: parseCartItems(data) });
   } catch (error) {
     next(error);
   }

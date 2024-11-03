@@ -17,6 +17,9 @@ importers:
       ioredis:
         specifier: ^5.4.1
         version: 5.4.1
+      xior:
+        specifier: ^0.6.1
+        version: 0.6.1
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -514,9 +517,17 @@ packages:
     resolution: {integrity: sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==}
     engines: {node: '>= 0.8'}
 
+  tiny-lru@11.2.11:
+    resolution: {integrity: sha512-27BIW0dIWTYYoWNnqSmoNMKe5WIbkXsc0xaCQHd3/3xT2XMuMJrzHdrO9QBFR14emBz1Bu0dOAs2sCBBrvgPQA==}
+    engines: {node: '>=12'}
+
   toidentifier@1.0.1:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
+
+  ts-deepmerge@7.0.1:
+    resolution: {integrity: sha512-JBFCmNenZdUCc+TRNCtXVM6N8y/nDQHAcpj5BlwXG/gnogjam1NunulB9ia68mnqYI446giMfpqeBFFkOleh+g==}
+    engines: {node: '>=14.13.1'}
 
   tsx@4.19.1:
     resolution: {integrity: sha512-0flMz1lh74BR4wOvBjuh9olbnwqCPc35OOlfyzHba0Dc+QNUeWX/Gq2YTbnwcWPO3BMd8fkzRVrHcsR+a7z7rA==}
@@ -546,6 +557,9 @@ packages:
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
+
+  xior@0.6.1:
+    resolution: {integrity: sha512-fDF03AFiAev4Tz9G7xEorhxSj8/BJu7Yt4joRw7D4wDFSqxHaObBVAjDTPQEIAcGmd4xf1vVFdTsEIDV+y+l9A==}
 
   zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
@@ -1020,7 +1034,11 @@ snapshots:
 
   statuses@2.0.1: {}
 
+  tiny-lru@11.2.11: {}
+
   toidentifier@1.0.1: {}
+
+  ts-deepmerge@7.0.1: {}
 
   tsx@4.19.1:
     dependencies:
@@ -1043,5 +1061,10 @@ snapshots:
   utils-merge@1.0.1: {}
 
   vary@1.1.2: {}
+
+  xior@0.6.1:
+    dependencies:
+      tiny-lru: 11.2.11
+      ts-deepmerge: 7.0.1
 
   zod@3.23.8: {}

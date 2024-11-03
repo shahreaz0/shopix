@@ -4,6 +4,8 @@ import { cartRouter } from "@/routes/cart.route";
 import { ApiError } from "@/lib/api-error";
 import { env } from "./lib/env";
 
+import "./events/on-key-expires";
+
 const app = express();
 
 app.use(express.json());
