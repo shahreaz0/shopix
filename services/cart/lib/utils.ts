@@ -1,7 +1,7 @@
 export function parseCartItems(itemObj: Record<string, string>) {
   return Object.entries(itemObj).map((e) => {
-    const [_key, value] = e;
+    const [key, value] = e;
 
-    return { ...JSON.parse(value) };
+    return { productId: key, ...JSON.parse(value) };
   });
 }

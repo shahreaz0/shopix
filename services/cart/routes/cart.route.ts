@@ -6,7 +6,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { env } from "@/lib/env";
 
 import xior from "xior";
-import { parseCartItems } from "@/lib/utls";
+import { parseCartItems } from "@/lib/utils";
 
 export const cartRouter = express.Router();
 
@@ -104,6 +104,27 @@ cartRouter.get("/", async (req, res, next) => {
     const data = await redis.hgetall(`cart:${cartSessionId}`);
 
     res.json({ message: "success", data: parseCartItems(data) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route GET /cart/clean
+ * @desc clean session and data
+ */
+
+cartRouter.get("/clean", async (req, res, next) => {
+  try {
+    const cartSessionId = req.headers["x-cart-session-id"];
+
+    await redis.del(`sessions:${cartSessionId}`);
+
+    await redis.del(`cart:${cartSessionId}`);
+
+    delete req.headers["x-cart-session-id"];
+
+    res.json({ message: "success" });
   } catch (error) {
     next(error);
   }

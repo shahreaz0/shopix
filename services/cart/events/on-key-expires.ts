@@ -1,6 +1,6 @@
 import { env } from "@/lib/env";
 import { redis } from "@/lib/redis";
-import { parseCartItems } from "@/lib/utls";
+import { parseCartItems } from "@/lib/utils";
 import { Redis } from "ioredis";
 import xior from "xior";
 

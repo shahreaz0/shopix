@@ -12,3 +12,37 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  userId     String
+  userName   String
+  userEmail  String
+  tax        Float       @default(0)
+  subTotal   Float       @default(0)
+  grandTotal Float       @default(0)
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id          String @id @default(cuid())
+  orderId     String
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  productName String
+  sku         String
+  price       Float
+  quantity    Int
+  total       Float
+}
