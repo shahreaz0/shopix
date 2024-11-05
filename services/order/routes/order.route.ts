@@ -1,6 +1,7 @@
 import { ApiError } from "@/lib/api-error";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
+import { sendToQueue } from "@/lib/utils";
 import { validateResource } from "@/lib/validate-resource";
 import { OrderCreate, orderCreateSchema } from "@/schemas/order.schema";
 import express, { NextFunction, Request, Response } from "express";
@@ -106,6 +107,9 @@ orderRouter.post(
           },
         },
       });
+
+      await sendToQueue("clear-cart", { cartSessionId });
+      await sendToQueue("send-email", order);
 
       await xior.get(`${env.get("CART_SERVICE_BASE_URL")}/cart/clean`, {
         headers: {
