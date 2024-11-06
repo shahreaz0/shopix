@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { transporter } from "@/lib/utils";
 import { validateResource } from "@/lib/validate-resource";
 import { emailSendSchema, EmailSend } from "@/schemas/email.schema";
+import { saveEmail, sendEmail } from "@/services/email.service";
 import express, { NextFunction, Request, Response } from "express";
 
 export const emailRouter = express.Router();
@@ -17,12 +18,9 @@ emailRouter.post(
     next: NextFunction
   ) => {
     try {
-      const sender =
-        req.body.sender || env.get("DEFAULT_SENDER_EMAIL") || "ashahreaz@gmail.com";
-
-      const { rejected } = await transporter.sendMail({
+      const { rejected } = await sendEmail({
         to: req.body.recipient,
-        from: sender,
+        from: req.body?.sender,
         subject: req.body.subject,
         text: req.body.body,
       });
@@ -31,11 +29,9 @@ emailRouter.post(
         throw new ApiError("Failed to send email", 400);
       }
 
-      const email = await prisma.email.create({
-        data: {
-          ...req.body,
-          sender,
-        },
+      const email = await saveEmail({
+        ...req.body,
+        sender: req.body.sender,
       });
 
       res.send({ message: "Email send successfully", data: email });

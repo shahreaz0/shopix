@@ -4,6 +4,7 @@ import { cartRouter } from "@/routes/cart.route";
 import { ApiError } from "@/lib/api-error";
 import { env } from "./lib/env";
 
+import { cartClearReciever } from "./lib/reciever";
 import "./events/on-key-expires";
 
 const app = express();
@@ -11,6 +12,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
+
+cartClearReciever();
 
 app.get("/health", (_, res) => {
   res.send({ status: "ok", service: "cart", timestamp: Date.now() });

@@ -6,6 +6,10 @@ import { env } from "./lib/env";
 
 const app = express();
 
+import { emailReciever } from "./lib/reciever";
+
+emailReciever();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());

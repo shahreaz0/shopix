@@ -111,19 +111,6 @@ orderRouter.post(
       await sendToQueue("clear-cart", { cartSessionId });
       await sendToQueue("send-email", order);
 
-      await xior.get(`${env.get("CART_SERVICE_BASE_URL")}/cart/clean`, {
-        headers: {
-          "x-cart-session-id": cartSessionId,
-        },
-      });
-
-      await xior.post(`${env.get("EMAIL_SERVICE_BASE_URL")}/emails/send`, {
-        recipient: "b@d.com",
-        subject: "Order Confirmed",
-        body: `Thank you for your order. The order ID is ${order.id}. Total: ${grandTotal}`,
-        source: "checkout",
-      });
-
       res.json({ message: "order created", data: order });
     } catch (error) {
       next(error);

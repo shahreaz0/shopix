@@ -7,6 +7,7 @@ import { env } from "@/lib/env";
 
 import xior from "xior";
 import { parseCartItems } from "@/lib/utils";
+import { clearCart } from "@/services/cart.service";
 
 export const cartRouter = express.Router();
 
@@ -116,11 +117,9 @@ cartRouter.get("/", async (req, res, next) => {
 
 cartRouter.get("/clean", async (req, res, next) => {
   try {
-    const cartSessionId = req.headers["x-cart-session-id"];
+    const cartSessionId = req.headers["x-cart-session-id"] as string;
 
-    await redis.del(`sessions:${cartSessionId}`);
-
-    await redis.del(`cart:${cartSessionId}`);
+    await clearCart(cartSessionId);
 
     delete req.headers["x-cart-session-id"];
 
