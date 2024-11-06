@@ -3,16 +3,15 @@ import cors from "cors";
 import { emailRouter } from "@/routes/email.route";
 import { ApiError } from "@/lib/api-error";
 import { env } from "./lib/env";
-
-const app = express();
-
 import { emailReciever } from "./lib/reciever";
 
-emailReciever();
+const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
+
+emailReciever();
 
 app.get("/health", (_, res) => {
   res.send({ status: "ok", service: "email", timestamp: Date.now() });
