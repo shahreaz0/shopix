@@ -44,11 +44,9 @@ export async function signJWT(payload: Payload, expiresIn = "30m") {
     const jwt = await new jose.SignJWT(payload)
       .setProtectedHeader({ alg })
       .setIssuedAt()
-      .setExpirationTime(expiresIn)
-      .setIssuer("http://localhost:4003")
+      .setExpirationTime("5m")
+      .setIssuer("Wu86zkDoWi6M7jKVE2JcUbJiklFOdUCI")
       .sign(privateKey);
-
-    console.log(jwt);
 
     return jwt;
   } catch (error) {

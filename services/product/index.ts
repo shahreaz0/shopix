@@ -31,7 +31,7 @@ app.use(((err, _req, res, _next) => {
   });
 }) as ErrorRequestHandler);
 
-const PORT = process.env.PORT || 4002;
+const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => {
-  console.log(`http://localhost:${PORT}/hc`);
+  console.log(`http://localhost:${PORT}/health`);
 });
