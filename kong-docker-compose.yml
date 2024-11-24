@@ -78,7 +78,7 @@ services:
       KONG_PLUGINSERVER_JS_SOCKET: /usr/local/kong/js_pluginserver.sock
       KONG_PLUGINSERVER_JS_START_CMD: /usr/local/bin/kong-js-pluginserver -v --plugins-directory /usr/local/kong/js-plugins
       KONG_PLUGINSERVER_JS_QUERY_CMD: /usr/local/bin/kong-js-pluginserver --plugins-directory /usr/local/kong/js-plugins --dump-all-plugins
-      KONG_PLUGINS: bundled,custom-auth
+      KONG_PLUGINS: bundled,oidc
       KONG_ADMIN_GUI_PATH: /
       KONG_ADMIN_GUI_URL: http://localhost:8002
     depends_on:
